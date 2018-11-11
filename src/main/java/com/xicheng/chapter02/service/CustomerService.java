@@ -1,5 +1,6 @@
 package com.xicheng.chapter02.service;
 
+import com.xicheng.chapter02.helper.DatabaseHelper;
 import com.xicheng.chapter02.pojo.Customer;
 import com.xicheng.chapter02.util.PropsUtil;
 import org.slf4j.Logger;
@@ -14,24 +15,6 @@ import java.util.Properties;
 public class CustomerService {
 
     private static final Logger LOOGER = LoggerFactory.getLogger(CustomerService.class);
-    private static String DRIVER = null;
-    private static String URL = null;
-    private static String USERNAME = null;
-    private static String PASSWORD = null;
-
-    static {
-        Properties conf = PropsUtil.loadProps("config.properties");
-        DRIVER = conf.getProperty("jdbc.driver");
-        URL = conf.getProperty("jdbc.url");
-        USERNAME = conf.getProperty("jdbc.username");
-        PASSWORD = conf.getProperty("jdbc.password");
-
-        try {
-            Class.forName(DRIVER);
-        } catch (ClassNotFoundException e) {
-            LOOGER.error("can not load jdbc driver");
-        }
-    }
 
     /**
      * 获取客户列表
@@ -40,35 +23,8 @@ public class CustomerService {
      */
     public List<Customer> getCustomerList(String keyword) {
 
-        Connection conn = null;
-        List<Customer> customerList = new ArrayList<>();
-        try {
-            conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            String sql = "SELECT * FROM customer";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                Customer customer = new Customer();
-                customer.setId(rs.getLong("id"));
-                customer.setName(rs.getString("name"));
-                customer.setContact(rs.getString("contact"));
-                customer.setTelephone(rs.getString("telephone"));
-                customer.setEmail(rs.getString("email"));
-                customer.setRemark(rs.getString("remark"));
-                customerList.add(customer);
-            }
-        } catch (SQLException e) {
-            LOOGER.error("execute sql error", e);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    LOOGER.error("close connection failure", e);
-                }
-            }
-        }
-        return customerList;
+        String sql = "SELECT * FROM customer";
+        return DatabaseHelper.queryEntityList(Customer.class, sql);
     }
 
     /**
