@@ -1,5 +1,6 @@
 package com.xicheng.chapter2.test;
 
+import com.xicheng.chapter02.helper.DatabaseHelper;
 import com.xicheng.chapter02.pojo.Customer;
 import com.xicheng.chapter02.service.CustomerService;
 import org.junit.Assert;
@@ -16,7 +17,7 @@ public class CustomerServiceTest {
 
     @Before
     public void init() {
-
+        DatabaseHelper.executeSqlFile("sql/customer_init.sql");
     }
 
     @Test

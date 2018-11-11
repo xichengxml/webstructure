@@ -10,6 +10,10 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -34,7 +38,7 @@ public final class DatabaseHelper {
     private static final ThreadLocal<Connection> CONNECTION_HOLDER = new ThreadLocal<>();
     private static BasicDataSource dataSource;
     static {
-        Properties conf = PropsUtil.loadProps("conf.properties");
+        Properties conf = PropsUtil.loadProps("config.properties");
         driver = conf.getProperty("jdbc.driver");
         url = conf.getProperty("jdbc.url");
         username = conf.getProperty("jdbc.username");
@@ -147,6 +151,24 @@ public final class DatabaseHelper {
             throw new RuntimeException(e);
         }
         return rows;
+    }
+
+    /**
+     * 执行SQL文件
+     * @param filePath
+     */
+    public static void executeSqlFile(String filePath) {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(filePath);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String sql;
+        try {
+            while ((sql = reader.readLine()) != null) {
+                executeUpdate(sql);
+            }
+        } catch (IOException e) {
+            LOGGER.error("execute sql file failure", e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
