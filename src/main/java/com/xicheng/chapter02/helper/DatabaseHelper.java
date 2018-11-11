@@ -2,6 +2,7 @@ package com.xicheng.chapter02.helper;
 
 import com.xicheng.chapter02.util.CollectionUtil;
 import com.xicheng.chapter02.util.PropsUtil;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,7 +32,7 @@ public final class DatabaseHelper {
     private static String password;
 
     private static final ThreadLocal<Connection> CONNECTION_HOLDER = new ThreadLocal<>();
-
+    private static BasicDataSource dataSource;
     static {
         Properties conf = PropsUtil.loadProps("conf.properties");
         driver = conf.getProperty("jdbc.driver");
@@ -38,6 +40,11 @@ public final class DatabaseHelper {
         username = conf.getProperty("jdbc.username");
         password = conf.getProperty("jdbc.password");
 
+        dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(driver);
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
@@ -53,7 +60,7 @@ public final class DatabaseHelper {
         Connection conn = CONNECTION_HOLDER.get();
         if (conn == null) {
             try {
-                conn = DriverManager.getConnection(url, username, password);
+                conn = dataSource.getConnection();
             } catch (SQLException e) {
                 LOGGER.error("get connection error", e);
                 throw new RuntimeException(e);
@@ -62,23 +69,6 @@ public final class DatabaseHelper {
             }
         }
         return conn;
-    }
-
-    /**
-     * 关闭数据库连接
-     */
-    public static void closeConnection() {
-        Connection conn = CONNECTION_HOLDER.get();
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOGGER.error("close connection failure");
-                throw new RuntimeException(e);
-            } finally {
-                CONNECTION_HOLDER.remove();
-            }
-        }
     }
 
     private static final QueryRunner QUERY_RUNNER = new QueryRunner();
@@ -99,8 +89,6 @@ public final class DatabaseHelper {
         } catch (SQLException e) {
             LOGGER.error("query entity error", e);
             throw new RuntimeException(e);
-        } finally {
-            closeConnection();
         }
         return entityList;
     }
@@ -121,8 +109,6 @@ public final class DatabaseHelper {
         } catch (SQLException e) {
             LOGGER.error("query entity error", e);
             throw new RuntimeException(e);
-        } finally {
-            closeConnection();
         }
         return entity;
     }
@@ -159,8 +145,6 @@ public final class DatabaseHelper {
         } catch (Exception e) {
             LOGGER.error("execute update failure", e);
             throw new RuntimeException(e);
-        } finally {
-            closeConnection();
         }
         return rows;
     }
@@ -187,9 +171,51 @@ public final class DatabaseHelper {
         }
         columns.replace(columns.lastIndexOf(", "), columns.length(), ")");
         values.replace(columns.lastIndexOf(", "), values.length(), ")");
-        sql += columns + " VALUES" + values;
+        sql += columns + " VALUES " + values;
 
         Object[] params = fieldMap.values().toArray();
         return executeUpdate(sql, params) == 1;
+    }
+
+    /**
+     * 更新实体
+     * @param entityClass
+     * @param fieldMap
+     * @param <T>
+     * @return
+     */
+    public static <T> boolean updateEntity(Class<T> entityClass, Map<String, Object> fieldMap, long id) {
+        if (CollectionUtil.isEmpty(fieldMap)) {
+            LOGGER.error("can not updateEntity, fieldMap is empty");
+            return false;
+        }
+        String sql = "UPDATE " + getTaleName(entityClass) + " SET ";
+        StringBuilder columns = new StringBuilder();
+        for (String fieldName : fieldMap.keySet()) {
+            columns.append(fieldName).append("=?, ");
+        }
+        sql += columns.substring(0, columns.lastIndexOf(", ")) + " WHERE id=?";
+        List<Object> paramList = new ArrayList<>();
+        paramList.add(id);
+        Object[] params = paramList.toArray();
+
+        return executeUpdate(sql, params) == 1;
+    }
+
+    /**
+     * 删除实体
+     * @param entityClass
+     * @param id
+     * @param <T>
+     * @return
+     */
+    public static <T> boolean deleteEntity(Class<T> entityClass, long id) {
+        String sql = "DELETE FROM " + getTaleName(entityClass) + " WHERE id=?";
+        return executeUpdate(sql, id) == 1;
+
+    }
+
+    private static String getTaleName(Class<?> entityClass) {
+        return entityClass.getSimpleName();
     }
 }
