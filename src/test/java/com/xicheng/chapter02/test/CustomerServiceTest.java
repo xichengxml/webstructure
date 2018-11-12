@@ -1,4 +1,4 @@
-package com.xicheng.chapter2.test;
+package com.xicheng.chapter02.test;
 
 import com.xicheng.chapter02.helper.DatabaseHelper;
 import com.xicheng.chapter02.pojo.Customer;
