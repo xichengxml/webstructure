@@ -1,18 +1,32 @@
 package com.xicheng.chapter03.framework.common;
 
+import com.xicheng.chapter02.util.CollectionUtil;
 import com.xicheng.chapter02.util.StringUtil;
+import com.xicheng.chapter03.framework.bean.Data;
 import com.xicheng.chapter03.framework.bean.Handler;
+import com.xicheng.chapter03.framework.bean.Param;
+import com.xicheng.chapter03.framework.bean.View;
 import com.xicheng.chapter03.framework.helper.BeanHelper;
 import com.xicheng.chapter03.framework.helper.ConfigHelper;
 import com.xicheng.chapter03.framework.helper.ControllerHelper;
+import com.xicheng.chapter03.framework.util.CodeUtil;
+import com.xicheng.chapter03.framework.util.JsonUtil;
+import com.xicheng.chapter03.framework.util.ReflectionUtil;
 import com.xicheng.chapter03.framework.util.StreamUtil;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +68,49 @@ public class DispatcherServlet extends HttpServlet {
                 paramMap.put(paramName, paramValue);
                 String body = CodeUtil.decodeURL(StreamUtil.getString(req.getInputStream()));
                 if (StringUtil.isNotEmpty(body)) {
-                    StringUtil.
+                    String[] params = StringUtils.split(body, "&");
+                    if (ArrayUtils.isNotEmpty(params)){
+                        for (String param : params) {
+                            String[] paramBody = StringUtils.split(param, "=");
+                            String reqKey = paramBody[0];
+                            String reqValue = paramBody[1];
+                            paramMap.put(reqKey, reqValue);
+                        }
+                    }
+                }
+            }
+            Param param = new Param(paramMap);
+            // 调用Action方法
+            Method actionMethod = handler.getActionMethod();
+            Object result = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+            // 处理Action方法的返回值
+            if (result instanceof View) {
+                // 返回jsp页面
+                View view = (View) result;
+                String path = view.getPath();
+                if (StringUtil.isNotEmpty(path)) {
+                    if (path.startsWith("/")) {
+                        resp.sendRedirect(req.getContextPath() + path);
+                    }else {
+                        Map<String, Object> model = view.getModel();
+                        for (Map.Entry<String, Object> entry : model.entrySet()) {
+                            req.setAttribute(entry.getKey(), entry.getValue());
+                        }
+                        req.getRequestDispatcher(ConfigHelper.getAppJspPath() + path).forward(req, resp);
+                    }
+                }
+            } else if (result instanceof Data) {
+                // 返回json数据
+                Data data = (Data) result;
+                Object model = data.getData();
+                if (model != null) {
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    PrintWriter printWriter = resp.getWriter();
+                    String json = JsonUtil.toJson(model);
+                    printWriter.write(json);
+                    printWriter.flush();
+                    printWriter.close();
                 }
             }
         }

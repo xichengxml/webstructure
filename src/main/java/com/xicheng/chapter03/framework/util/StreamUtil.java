@@ -20,7 +20,7 @@ public class StreamUtil {
      * @param is
      * @return
      */
-    public static String getstring(InputStream is) {
+    public static String getString(InputStream is) {
         StringBuilder stringBuilder = new StringBuilder();
         try {
             BufferedReader bf = new BufferedReader(new InputStreamReader(is));
