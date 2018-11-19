@@ -1,7 +1,7 @@
-package com.xicheng.chapter04.proxy.staticp;
+package com.xicheng.chapter04_1.proxy.staticp;
 
-import com.xicheng.chapter04.proxy.common.Hello;
-import com.xicheng.chapter04.proxy.common.HelloImpl;
+import com.xicheng.chapter04_1.proxy.common.Hello;
+import com.xicheng.chapter04_1.proxy.common.HelloImpl;
 
 public class HelloProxy implements Hello {
 

@@ -1,4 +1,4 @@
-package com.xicheng.chapter04.proxy.common;
+package com.xicheng.chapter04_1.proxy.common;
 
 public interface Apology {
 

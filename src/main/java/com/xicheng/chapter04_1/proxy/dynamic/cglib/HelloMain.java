@@ -1,7 +1,7 @@
-package com.xicheng.chapter04.proxy.dynamic.cglib;
+package com.xicheng.chapter04_1.proxy.dynamic.cglib;
 
-import com.xicheng.chapter04.proxy.common.Hello;
-import com.xicheng.chapter04.proxy.common.HelloImpl;
+import com.xicheng.chapter04_1.proxy.common.Hello;
+import com.xicheng.chapter04_1.proxy.common.HelloImpl;
 
 public class HelloMain {
 

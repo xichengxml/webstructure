@@ -1,4 +1,4 @@
-package com.xicheng.chapter04.proxy.dynamic.cglib;
+package com.xicheng.chapter04_1.proxy.dynamic.cglib;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;

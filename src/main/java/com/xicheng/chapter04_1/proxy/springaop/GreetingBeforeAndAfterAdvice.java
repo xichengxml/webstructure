@@ -1,4 +1,4 @@
-package com.xicheng.chapter04.proxy.springaop;
+package com.xicheng.chapter04_1.proxy.springaop;
 
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;

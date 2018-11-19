@@ -1,6 +1,4 @@
-package com.xicheng.chapter04.proxy.common;
-
-import com.xicheng.chapter04.proxy.common.Hello;
+package com.xicheng.chapter04_1.proxy.common;
 
 public class HelloImpl implements Hello {
 

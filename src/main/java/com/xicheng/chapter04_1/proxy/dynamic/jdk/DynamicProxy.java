@@ -1,4 +1,4 @@
-package com.xicheng.chapter04.proxy.dynamic.jdk;
+package com.xicheng.chapter04_1.proxy.dynamic.jdk;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

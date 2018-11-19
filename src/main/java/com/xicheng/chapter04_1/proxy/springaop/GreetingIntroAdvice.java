@@ -1,6 +1,6 @@
-package com.xicheng.chapter04.proxy.springaop;
+package com.xicheng.chapter04_1.proxy.springaop;
 
-import com.xicheng.chapter04.proxy.common.Apology;
+import com.xicheng.chapter04_1.proxy.common.Apology;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
