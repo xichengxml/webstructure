@@ -4,6 +4,7 @@ import com.xicheng.chapter03.framework.annotation.Controller;
 import com.xicheng.chapter03.framework.annotation.Service;
 import com.xicheng.chapter03.framework.util.ClassUtil;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -67,5 +68,39 @@ public class ClassHelper {
         beanClassSet.addAll(getServiceClassSet());
         beanClassSet.addAll(getControllerClassSet());
         return beanClassSet;
+    }
+
+    /**
+    * @Description 获取应用包名下某父类（接口）的所有子类（或实现类）
+    * @Date 2018/11/22
+    * @Author xichengxml
+    * @param
+    * @return
+    */
+    public static Set<Class<?>> getClassSetBySuper(Class<?> superClass) {
+        Set<Class<?>> clsSet = new HashSet<>();
+        for (Class<?> cls : classSet) {
+            if (superClass.isAssignableFrom(cls) && !superClass.equals(cls)) {
+                clsSet.add(cls);
+            }
+        }
+        return clsSet;
+    }
+
+    /**
+    * @Description 获取应用包名下带有某注解的所有类
+    * @Date 2018/11/23
+    * @Author xichengxml
+    * @param
+    * @return
+    */
+    public static Set<Class<?>> getClassSetByAnnotation(Class<? extends Annotation> annotationClass) {
+        Set<Class<?>> clsSet = new HashSet<>();
+        for (Class<?> cls : classSet) {
+            if (cls.isAnnotationPresent(annotationClass)) {
+                clsSet.add(cls);
+            }
+        }
+        return clsSet;
     }
 }
